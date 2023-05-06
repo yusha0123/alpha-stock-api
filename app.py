@@ -2,9 +2,12 @@ from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 import requests
 from bs4 import BeautifulSoup
+from flask_caching import Cache
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
+cache = Cache(app, config={'CACHE_TYPE': 'simple',
+              'CACHE_DEFAULT_TIMEOUT': 300})
 
 
 @app.route('/', methods=['GET'])
@@ -15,6 +18,7 @@ def home():
 
 @app.route('/top_gainers', methods=['GET'])
 @cross_origin()
+@cache.cached()  # add caching decorator
 def top_gainers():
     url = "https://finance.yahoo.com/gainers"
     response = requests.get(url)
@@ -36,6 +40,7 @@ def top_gainers():
 
 @app.route('/top_losers', methods=['GET'])
 @cross_origin()
+@cache.cached()  # add caching decorator
 def top_losers():
     url = "https://finance.yahoo.com/losers"
     response = requests.get(url)
@@ -57,6 +62,7 @@ def top_losers():
 
 @app.route('/stock/<symbol>', methods=['GET'])
 @cross_origin()
+@cache.cached()  # add caching decorator
 def get_stock_details(symbol):
     url = f'https://finance.yahoo.com/quote/{symbol}'
     headers = {
